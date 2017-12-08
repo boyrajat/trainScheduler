@@ -1,0 +1,25 @@
+body {
+	background-color: black;
+}
+
+#myHeader {
+	margin-top: 20px;
+
+}
+
+#jumboContainer {
+	background-color: beige;
+	color : black;
+	margin-bottom: 10px;
+}
+.panelHeader {
+	background-color: blue;
+	color: white;
+
+}
+h4 {
+	margin: 0 auto;	
+}
+.panel-body {
+	background-color: beige;
+}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<title>Train Schedule</title>
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="assets/cs/style.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+</head>
+<body>
+	
+	<!-- Header Jumbotron -->
+<div id="myHeader" class="row text-center">
+	<div class="col-md-2"></div>
+	<div class="col-md-8 text-center">
+		<div id="jumboContainer" class="jumbotron text-center">
+			<h1> Train Train Train </h1>
+		</div>
+	</div>
+	<div class="col-md-2"></div>
+</div>
+	
+	<!-- Train Schedule display panel -->
+<div id="schedulWindow" class="row">
+	<div class="col-md-2"></div>
+	<div class="col-md-8">
+		<div class="panel panel-default">
+			<div class="panelHeader">
+				<h4> Current Train Schedule </h4>
+			</div>
+			<div class="panel-body">
+				<table id="result" class="table">
+					<thead>
+						<tr>
+							<th>Train Name</th>
+							<th>Destination</th>
+							<th>Platform</th>
+							<th>Expected Arrival</th>
+							<th>Minutes Away</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-2"></div>
+</div>
+
+	<!-- Add new train form panel -->
+<div id="trainForm" class="row">
+	<div class="col-md-2"></div>
+	<div class="col-md-8">
+		<div class="panel panel-default">
+			<div class="panelHeader">
+				<h4> Add Train </h4>
+			</div>
+			<div class="panel-body">
+				<form>
+ 					 <div class="form-group">
+   						 <label for="trainName">Train Name</label>
+    					<input type="text" class="form-control" id="tname">
+  					</div>
+ 					 <div class="form-group">
+    					<label for="Destination">Destination</label>
+    					<input type="text" class="form-control" id="tdest">
+  					</div>
+  					<div class="form-group">
+    					<label for="trainTime">First Train Time (hh:mm military time)</label>
+    					<input type="text" class="form-control" id="ttime">
+  					</div>
+  					<div class="form-group">
+    					<label for="platform">Platform #</label>
+    					<input type="text" class="form-control" id="plat">
+  					</div>
+  					
+  					<button type="submit" class="btn btn-default">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-2"></div>
+</div>
+
+
+	
+
+
+<script type="text/javascript">
+	var time = moment();
+	console.log(time);
+
+
+	var queryUrl = "https://transportapi.com/v3/uk/train/station/eus/live.json?app_id=20911eb4&app_key=94c170273fbcd5aaf5e54727e8ac8617&darwin=false&train_status=passenger&type=arrival";
+	
+$.ajax({url: queryUrl, method: "GET"})
+.done(function(response) {
+
+	console.log(response);
+	console.log(response.arrivals.all[0].train_uid);
+	console.log(response.arrivals.all[0].destination_name);
+	console.log(response.arrivals.all[0].platform);
+	console.log(response.arrivals.all[0].expected_arrival_time);
+	console.log(response.arrivals.all[0].best_arrival_estimate_mins);
+	
+
+
+})
+
+</script>
+
+
+
+
+
+
+</body>
+</html>
