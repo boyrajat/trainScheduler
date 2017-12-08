@@ -15,7 +15,8 @@
 	<div class="col-md-2"></div>
 	<div class="col-md-8 text-center">
 		<div id="jumboContainer" class="jumbotron text-center">
-			<h1> Train Train Train </h1>
+			<h1 class="display-3"> Train Train Train </h1>
+			<p id="currentTime" class="lead"></p>
 		</div>
 	</div>
 	<div class="col-md-2"></div>
@@ -87,8 +88,13 @@
 
 
 <script type="text/javascript">
+	
+var whatTime = function () {
 	var time = moment();
-	console.log(time);
+	console.log(time._d);
+	$("#currentTime").text(time._d);
+}
+setInterval(whatTime, 1000);
 
 
 	var queryUrl = "https://transportapi.com/v3/uk/train/station/eus/live.json?app_id=20911eb4&app_key=94c170273fbcd5aaf5e54727e8ac8617&darwin=false&train_status=passenger&type=arrival";
