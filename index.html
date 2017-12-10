@@ -7,6 +7,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="assets/cs/style.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.14/moment-timezone-with-data.min.js"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.3/locale/af.js" integrity="sha256-WGaarUwCx5C8lcwQNA9VOfeBTLkL+LaWOSJQaGGwqnA=" crossorigin="anonymous"></script> -->
 </head>
 <body>
 	
@@ -35,12 +37,14 @@
 					<thead>
 						<tr>
 							<th>Train Name</th>
-							<th>Destination</th>
-							<th>Platform</th>
+							<th>Origin</th>
 							<th>Expected Arrival</th>
+							<th>Platform</th>
 							<th>Minutes Away</th>
+							<th>Remove This Train</th>
 						</tr>
 					</thead>
+					<tbody id="autoTrain"></tbody>
 				</table>
 			</div>
 		</div>
@@ -60,22 +64,26 @@
 				<form>
  					 <div class="form-group">
    						 <label for="trainName">Train Name</label>
-    					<input type="text" class="form-control" id="tname">
+    					<input type="text" class="form-control" id="tname" placeholder="Enter Train name">
   					</div>
  					 <div class="form-group">
-    					<label for="Destination">Destination</label>
-    					<input type="text" class="form-control" id="tdest">
+    					<label for="Destination">Origin</label>
+    					<input type="text" class="form-control" id="tdest" placeholder="Enter Origin Station or city">
   					</div>
   					<div class="form-group">
-    					<label for="trainTime">First Train Time (hh:mm military time)</label>
-    					<input type="text" class="form-control" id="ttime">
+    					<label for="trainTime">Expected Arrival (hh:mm military time)</label>
+    					<input id="ttime" type="text" pattern="([01]?[0-9]|2[0-3])(:[0-5][0-9]){2}" required="required" placeholder="hh:mm"/>
+    <!-- <input type="submit"/> -->
+
+    					<!-- <input type="text" class="form-control" id="ttime" 
+    					 placeholder="Enter arrival in HH:MM military format"> -->
   					</div>
   					<div class="form-group">
     					<label for="platform">Platform #</label>
-    					<input type="text" class="form-control" id="plat">
+    					<input type="text" class="form-control" id="tplat" placeholder="Platform number is optional">
   					</div>
   					
-  					<button type="submit" class="btn btn-default">Submit</button>
+  					<button id="submit" type="submit" class="btn btn-default">Submit</button>
 				</form>
 			</div>
 		</div>
@@ -84,34 +92,304 @@
 </div>
 
 
-	
+
+<script src="https://www.gstatic.com/firebasejs/4.8.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyD2SUYUL7QFF4nyRKdMcFMoLMtYPXoLglg",
+    authDomain: "trainschedule-303a9.firebaseapp.com",
+    databaseURL: "https://trainschedule-303a9.firebaseio.com",
+    projectId: "trainschedule-303a9",
+    storageBucket: "",
+    messagingSenderId: "430741652368"
+  };
+  firebase.initializeApp(config);
 
 
-<script type="text/javascript">
+
+
 	
 var whatTime = function () {
 	var time = moment();
-	console.log(time._d);
+	//console.log(time._d);
 	$("#currentTime").text(time._d);
 }
 setInterval(whatTime, 1000);
 
+var database = firebase.database();
 
+var autoTrainarr = [];
+
+database.ref().on("value", function(snapshot) {
+	console.log(snapshot.val().autoTrainarr);
+	autoTrainarr = snapshot.val().autoTrainarr;
+	//console.log(autoTrainarr);
+	displayAutoTrain();
+//	//displayAutoTrain();
+}, function(errorObject) {
+	console.log("Error handled: " + errorObject.code);
+})
+
+function autoTrain() {
 	var queryUrl = "https://transportapi.com/v3/uk/train/station/eus/live.json?app_id=20911eb4&app_key=94c170273fbcd5aaf5e54727e8ac8617&darwin=false&train_status=passenger&type=arrival";
+
 	
 $.ajax({url: queryUrl, method: "GET"})
 .done(function(response) {
 
-	console.log(response);
-	console.log(response.arrivals.all[0].train_uid);
-	console.log(response.arrivals.all[0].destination_name);
-	console.log(response.arrivals.all[0].platform);
-	console.log(response.arrivals.all[0].expected_arrival_time);
-	console.log(response.arrivals.all[0].best_arrival_estimate_mins);
+	//console.log(response);
+
+	//autoTrainarr = [];
+var j = 0;
+
+	for (var i = 0; i < 4; i++) {
+
+		
+ var ukTrainId = response.arrivals.all[i].train_uid;
+ //console.log(ukTrainId);
+ var ukTrainOrig = response.arrivals.all[i].origin_name;
+ var ukTrainPlat = response.arrivals.all[i].platform;
+  var ukTrainArr = response.arrivals.all[i].expected_arrival_time;
+  console.log(ukTrainArr);
+  var b = ukTrainArr.toString();
+  var c = moment(b, 'hh:mm');
+  console.log(c);
+// var newYork    = moment.tz("2014-06-01 12:00", "America/New_York");
+//   var london = newYork.clone().tz("Europe/London");
+//   console.log(london);
+//   var londonTime = moment(london).format('hh:mm');
+//   console.log(londonTime);
+// var d = londonTime.toString();
+  	var londonTime = moment().add(5, 'hours');
+  	console.log(londonTime);
+   var minsleft = c.diff(londonTime, "minutes")
+
+   // var minsleft = moment(c).diff(moment().add(6, 'hours'), "minutes");
+    console.log(minsleft);
+if (minsleft < 1) {
+
+
+
+  var train = {
+ 	name: ukTrainId,
+ 	origin: ukTrainOrig,
+ 	platform: ukTrainPlat,
+ 	arrivaltime: ukTrainArr,
+ 	minsleft: "ARRIVED"
+
+
+}
+} else {
+	 var train = {
+ 	name: ukTrainId,
+ 	origin: ukTrainOrig,
+ 	platform: ukTrainPlat,
+ 	arrivaltime: ukTrainArr,
+ 	minsleft: minsleft
+}
+}
+ 	autoTrainarr[i] = (train);
+ 	//autoTrainarr.unshift(train);
+ 	console.log(autoTrainarr);
+
+
+  }
+	console.log(autoTrainarr);
 	
+	database.ref().update({
+		autoTrainarr
+  	//Traininfo: autoTrainarr
+	//displayAutoTrain();
+  })
+	//displayAutoTrain();
+	
+	
+})
+}
+
+setInterval(autoTrain, 60000);
+
+//you need to make this data come from the database
+function displayAutoTrain(){
+	$("#autoTrain").empty();
+
+	for (l=0; l<autoTrainarr.length; l++) {
+
+	var newRow = $("<tr>");
+	var nameData = $("<td>" + autoTrainarr[l].name + "</td>");
+	newRow.append(nameData);
+	var destData = $("<td>" + autoTrainarr[l].origin + "</td>");
+	newRow.append(destData);
+	var arrData = $("<td>" + autoTrainarr[l].arrivaltime + "</td>");
+	newRow.append(arrData);
+	var platData = $("<td>" + autoTrainarr[l].platform + "</td>");
+	newRow.append(platData);
+	var minsData = $("<td>" + autoTrainarr[l].minsleft + "</td>");
+	newRow.append(minsData);
+
+var newButton = $("<td>" + '<button type="button" class="removeme" id='+l+'></button>' + "</td>");
+newRow.append(newButton);
+
+
+
+$("#autoTrain").append(newRow);
+console.log(newRow);
+}
+}
+// displayAutoTrain(i);
+
+
+	
+	$("#submit").on("click", function(event) {
+	event.preventDefault();
+
+	var name = $("#tname").val().trim();
+	var origin = $("#tdest").val().trim();
+	var arrtime = $("#ttime").val().trim();
+
+	var plat = $("#tplat").val().trim();
+
+	
+
+	var j = arrtime.toString();
+  	var k = moment(j, 'hh:mm');
+  	console.log(k);
+
+  	
+   var minsleft = k.diff(moment(), "minutes")
+
+   // var minsleft = moment(c).diff(moment().add(6, 'hours'), "minutes");
+    console.log(minsleft);
+
+//     if(alert('Alert For your User!')){}
+// else    window.location.reload();
+
+    if (minsleft < 1) {
+
+
+	var mntrain = {
+ 	name: name,
+ 	origin: origin,
+ 	platform: plat,
+ 	arrivaltime: arrtime,
+ 	minsleft: "ARRIVED"
+
+
+}
+} else {
+	 var mntrain = {
+ 	name: name,
+ 	origin: origin,
+ 	platform: plat,
+ 	arrivaltime: arrtime,
+ 	minsleft: minsleft
+ 	}
+}
+
+
+ 	if (name == "" || arrtime == "") {
+	alert("THIS INFORMATION CANNOT BE BLANK");
+	emptyForm();
+} else {
+
+emptyForm();
+autoTrainarr.push(mntrain);
+database.ref().update({
+	autoTrainarr
 
 
 })
+}
+
+
+	// database.ref().set({  this one replaces but push adds to the end
+//console.log(name);
+		// database.ref().push({ 
+		// name: name,
+		// email: email,
+		// age: age,
+		// comment: comment,
+		// joinDate: firebase.database.ServerValue.TIMESTAMP
+
+	});
+function emptyForm() {
+
+	$("#tname").attr("placeholder", "Enter Train Name").val("");
+	$("#tdest").attr("placeholder", "Enter Origin Station or City").val("");
+	$("#ttime").attr("placeholder", "Enter arrival in HH:MM military format").val("");
+	$("#tplat").attr("placeholder", "Platform number is optional").val("");
+}
+
+// $(".removeme").on("click", function(event) {
+//  var indexofbutt = $(this.id);
+ 
+//  console.log(indexofbutt);
+ 
+//  autoTrainarr[indexofbutt].remove();
+//  database.ref().update({
+// 	autoTrainarr
+
+
+// })
+// })
+$(document).on('click', '.removeme', function () {
+    // your function here
+
+	//alert("clicked");
+ var indexofbutt = $(this).attr('id');
+ 
+ console.log(indexofbutt);
+
+ if (indexofbutt <= 3) {
+ 	alert("FIRST 4 TRAINS AUTO UPDATE AND CANNOT BE REMOVED");
+ 	return;
+ } else {
+ 
+ autoTrainarr.splice(indexofbutt,1);
+ console.log(autoTrainarr);
+ database.ref().set({
+	autoTrainarr
+
+
+})
+	 }
+})
+
+function minsLeftUpdate() {
+ for (var s = 4; s < autoTrainarr.length; s++ ) {
+ 	var newTime = autoTrainarr[s].arrivaltime;
+
+ 	var r = newTime.toString();
+ 	var t = moment(r, 'hh:mm');
+ 	var updTime = t.diff(moment(), 'minutes');
+
+ 	if (updTime < 1) {
+
+ 		autoTrainarr[s].minsleft = "ARRIVED";
+
+ 	} else {
+ 	//console.log(updTime);
+ 	autoTrainarr[s].minsleft = updTime;
+ 	console.log(autoTrainarr[s].minsleft);
+}
+
+database.ref().update({
+	autoTrainarr
+
+
+})
+
+ }
+
+
+} 
+setInterval(minsLeftUpdate, 10000);
+
+$("#ttime").on("click", function(event) {
+	event.preventDefault();
+})
+
 
 </script>
 
